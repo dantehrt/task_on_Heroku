@@ -1,0 +1,343 @@
+{% load static %}
+<html>
+<head>
+    <title>Task</title>
+    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.css"
+          rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.js"></script>
+    <link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="{% static 'mturk/js/bbox_annotator.js' %}"></script>
+    <script src="{% static 'mturk/js/moment.js' %}"></script>
+    <script src="{% static 'mturk/js/moment-timezone.js' %}"></script>
+</head>
+
+{% if input_object.task_type == 'b' %}
+    <body>
+    <section class="container" id="all_content"
+             style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="panel panel-primary">
+                    <!-- WARNING: the ids "collapseTrigger" and "instructionBody" are being used to enable expand/collapse feature --><a
+                        class="panel-heading" href="javascript:void(0);"
+                        id="collapseTrigger"><strong>Instructions</strong>
+                    <span class="collapse-text">(Click to expand)</span> </a>
+                    <div class="panel-body" id="instructionBody">
+                        <div id="bounding_instruction">
+                            In this time, <b>Bounding box task.</b><br/>
+                            <ul>
+                                <li>When you choose <b>next</b>, your answer is submitted and you will move to next
+                                    task.
+                                </li>
+                                <li>When you choose <b>exit</b>, your answer is submitted and you will move to results
+                                    page.
+                                </li>
+                            </ul>
+                            Since your answer is judged automatically by the program, you <b>MUST</b> observe the
+                            following
+                            rule.
+
+                            <ul>
+                                <li>Draw bounding boxes around the following kinds of objects.
+                                    <ul>
+                                        <li>human</li>
+                                        <li>animals
+                                            <ul>
+                                                <li>dogs, cats, lions, birds, etc.</li>
+                                            </ul>
+                                        </li>
+                                        <li>cars</li>
+                                        <li>balls
+                                            <ul>
+                                                <li>
+                                                    soccer ball, baseball, volleyball, etc.
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>rockets</li>
+                                    </ul>
+                                </li>
+                                <li>Do <b>not</b> draw boxes around the above kinds of objects.
+                                    <ul>
+                                        <li>For example, plants, buildings, bicycle, etc.</li>
+                                    </ul>
+                                </li>
+                                <li>Draw <b>TIGHT</b> bounding boxes around the <b>each</b> objects
+                                </li>
+                                <li>Add a bounding box to <b>ALL</b> objects in the image</li>
+                                <li>Please draw bounding box even if the object is out of the image or overlapped.</li>
+                                <li>If you make a <b>mistake</b>, please press the 'x' button at the top right of the
+                                    box.
+                                </li>
+                            </ul>
+
+                            <h3>Example</h3>
+                            <img class="img-responsive"
+                                 src="{% static 'mturk/images/example_bounding.jpg' %}"/>
+                        </div>
+                    </div>
+                </div>
+
+                <section id="bounding_content">
+                    <div id="bbox_annotator" style="display:inline-block"></div>
+                    <div style="display:inline-block;vertical-align:top;" class="col-xs-12 col-md-12">
+                        <div>
+                            {% load crispy_forms_tags %}
+                            <form id="mainForm"
+                                  action="{% url 'mturk:submit' worker_id=worker_id assignment_id=assignment_id task_order=task_order task_condition=task_condition %}"
+                                  method="post">
+                                {% csrf_token %}
+                                <div class="col-xs-12 col-md-12">
+                                    {% for field in bounding_task_form %}
+                                        {{ field | as_crispy_field }}
+                                    {% endfor %}
+                                </div>
+                                <div class="col-xs-12 col-md-12" style="margin-top: 20px">
+                                    <input type="submit" class="btn btn-primary" value="next" name="submit_button"/>
+                                    <input type="submit" class="btn btn-primary" value="exit" name="exit_button"
+                                           style="background-color: red; border-color: red"/>
+                                </div>
+                            </form>
+                            {#                            <input id="reset_button" type="reset" class="btn btn-primary"/>#}
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Initialize the bounding-box annotator.
+            var annotator = new BBoxAnnotator({
+                url: "{% static 'mturk/images/bounding_images/' %}{{ input_object.image_url }}.jpg",
+                input_method: 'fixed',    // Can be one of ['text', 'select', 'fixed']
+                labels: "object",
+                guide: true,
+                onchange: function (entries) {
+                    // Input the text area on change. Use "hidden" input tag unless debugging.
+                    {#<input id="annotation_data" name="annotation_data" type="hidden" />#}
+                    $("#id_answer_annotation_data").val(JSON.stringify(entries))
+                    {#$("#annotation_data").text(JSON.stringify(entries, null, "  "));#}
+                }
+            });
+            // Initialize the reset button.
+            $("#reset_button").click(function (e) {
+                annotator.clear_all();
+            })
+        });
+
+        document.getElementById("id_answer_annotation_data").style.display = "none";
+
+    </script>
+
+    </body>
+
+    {# tagタスクの時#}
+{% else %}
+    <body>
+    <section class="container" id="all_content"
+             style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="panel panel-primary">
+                    <!-- WARNING: the ids "collapseTrigger" and "instructionBody" are being used to enable expand/collapse feature --><a
+                        class="panel-heading" href="javascript:void(0);"
+                        id="collapseTrigger"><strong>Instructions</strong>
+                    <span class="collapse-text">(Click to expand)</span> </a>
+                    <div class="panel-body" id="instructionBody">
+                        <div id="tag_instruction">
+                            In this time, <b>Annotation task.</b><br/>
+                            <ul>
+                                <li>When you choose <b>next</b>, your answer is submitted and you will move to next
+                                    task.
+                                </li>
+                                <li>When you choose <b>exit</b>, your answer is submitted and you will move to results
+                                    page.
+                                </li>
+                            </ul>
+                            Since your answer is judged automatically by the program, you <b>MUST</b> observe the
+                            following
+                            rule.
+
+                            <ul>
+                                <li>Numbers are attached to the upper left of the boxes in the image.</li>
+                                <li>Choose the one corresponding to each object from the following, describe it in the
+                                    below field <b>exactly the same</b> following sentences.
+                                    <ul>
+                                        <li>adult male</li>
+                                        <li>adult female</li>
+                                        <li>male child</li>
+                                        <li>female child</li>
+                                        <li>car</li>
+                                        <li>rocket</li>
+                                        <li>soccer ball</li>
+                                        <li>baseball</li>
+                                        <li>volleyball</li>
+                                        <li>tennis ball</li>
+                                        <li>dog</li>
+                                        <li>cat</li>
+                                        <li>horse</li>
+                                        <li>bird</li>
+                                        <li>lion</li>
+                                        <li>fish</li>
+                                        <li>deer</li>
+                                        <li>cattle</li>
+                                        <li>bear</li>
+                                        <li>camel</li>
+                                        <li>monkey</li>
+                                        <li>elephant</li>
+                                        <li>rhinoceros</li>
+                                    </ul>
+                                </li>
+                                <li>If there is no such thing, please input as <b>"object"</b>.</li>
+                                <li>If there is no corresponding number in the image please input as
+                                    <b>"nothing"</b>.(<b>NOT</b> "n/a", "none", etc.)
+                                </li>
+                                <li>Please be careful of <b>spelling errors</b>.</li>
+                            </ul>
+
+                            <h3>Example</h3>
+                            <img class="img-responsive"
+                                 src="{% static 'mturk/images/example_tag.png' %}"/></div>
+                    </div>
+                </div>
+
+                <section id="tag_content">
+                    <div class="col-xs-12 col-md-12" id="image" style="margin-bottom: 10px">
+                        <img class="img-responsive"
+                             src="{% static 'mturk/images/tagging_images/' %}{{ input_object.image_url }}.jpg"/>
+                    </div>
+                    <div class="col-xs-9">
+                        {% load crispy_forms_tags %}
+                        <form id="mainForm"
+                              action="{% url 'mturk:submit' worker_id=worker_id assignment_id=assignment_id task_order=task_order task_condition=task_condition %}"
+                              method="post">
+                            {% csrf_token %}
+                            <div class="col-xs-12 col-md-12">
+                                {% for field in annotation_task_form %}
+                                    {{ field | as_crispy_field }}
+                                {% endfor %}
+                            </div>
+                            <div class="col-xs-12 col-md-12" style="margin-top: 20px">
+                                <input type="submit" class="btn btn-primary" value="next" name="submit_button"/>
+                                <input type="submit" class="btn btn-primary" value="exit" name="exit_button"
+                                       style="background-color: red; border-color: red"/>
+                            </div>
+                        </form>
+                        {#<input id="reset_button" type="reset" class="btn btn-primary"/>#}
+                    </div>
+                    <div class="col-xs-3" style="border: #468cc8 solid 1px; border-radius: 5px;">
+                        <h4>sentences list</h4>
+                        <ul style="padding-left: 10px">
+                            <li>adult male</li>
+                            <li>adult female</li>
+                            <li>male child</li>
+                            <li>female child</li>
+                            <li>car</li>
+                            <li>rocket</li>
+                            <li>soccer ball</li>
+                            <li>baseball</li>
+                            <li>volleyball</li>
+                            <li>tennis ball</li>
+                            <li>dog</li>
+                            <li>cat</li>
+                            <li>horse</li>
+                            <li>bird</li>
+                            <li>lion</li>
+                            <li>fish</li>
+                            <li>deer</li>
+                            <li>cattle</li>
+                            <li>bear</li>
+                            <li>camel</li>
+                            <li>monkey</li>
+                            <li>elephant</li>
+                            <li>rhinoceros</li>
+                            <li><b>object</b></li>
+                            <li><b>nothing</b></li>
+                        </ul>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </section>
+    </body>
+{% endif %}
+
+</html>
+
+
+<style type="text/css">
+    fieldset {
+        padding: 10px;
+        background: #fbfbfb;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+
+    .txtbox {
+        margin: 10px;
+    }
+
+    #collapseTrigger {
+        color: #fff;
+        display: block;
+        text-decoration: none;
+    }
+</style>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        // Instructions expand/collapse
+        var content = $('#instructionBody');
+        var trigger = $('#collapseTrigger');
+        {% if not input_object.image_url == '001' %}
+            content.hide();
+        {% endif %}
+        $('.collapse-text').text('(Click to expand)');
+        trigger.click(function () {
+            content.toggle();
+            var isVisible = content.is(':visible');
+            if (isVisible) {
+                $('.collapse-text').text('(Click to collapse)');
+            } else {
+                $('.collapse-text').text('(Click to expand)');
+            }
+        });
+        // end expand/collapse
+    });
+    var now = moment().tz('Asia/Tokyo');
+    document.getElementById("id_worker_id").value = "{{ worker_id }}";
+    document.getElementById("id_assignment_id").value = "{{ assignment_id }}";
+    document.getElementById("id_accept_time").value = now.format("YYYY-MM-DD HH:mm:ss");
+    document.getElementById("id_submit_time").value = now.format("YYYY-MM-DD HH:mm:ss");
+    document.getElementById("id_work_time").value = 0;
+    document.getElementById("id_input_task_order").value = "{{ input_object.task_order }}";
+    document.getElementById("id_input_task_type").value = "{{ input_object.task_type }}";
+    document.getElementById("id_input_image_url").value = "{{ input_object.image_url }}";
+    document.getElementById("id_input_task_condition").value = "{{ task_condition }}";
+
+
+    document.getElementById("id_worker_id").style.display = "none";
+    document.getElementById("id_assignment_id").style.display = "none";
+    document.getElementById("id_accept_time").style.display = "none";
+    document.getElementById("id_submit_time").style.display = "none";
+    document.getElementById("id_work_time").style.display = "none";
+    document.getElementById("id_input_task_order").style.display = "none";
+    document.getElementById("id_input_task_type").style.display = "none";
+    document.getElementById("id_input_image_url").style.display = "none";
+    document.getElementById("id_input_task_condition").style.display = "none";
+
+    window.onload = function () {
+        document.getElementById("mainForm").onsubmit = function () {
+            var submit_time = moment().tz('Asia/Tokyo');
+            document.getElementById("id_submit_time").value = submit_time.format("YYYY-MM-DD HH:mm:ss");
+            var work_time = submit_time.diff(now);
+            document.getElementById("id_work_time").value = work_time;
+            return true
+        };
+    };
+</script>

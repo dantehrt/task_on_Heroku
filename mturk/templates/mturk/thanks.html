@@ -1,0 +1,45 @@
+{% load static %}
+<html>
+<head>
+    <title>Thanks</title>
+    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.css"
+          rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.js"></script>
+    <link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+
+<body>
+<section class="container" id="all_content"
+         style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+    <div class="row">
+        <div class="col-xs-12 col-md-12">
+            <h1>Thank you for your work</h1>
+            <ul>
+                <li>Please return MTurk"s page and paste this 'assignment_id'.</li>
+                <li><b>If you don't paste this assignment_id, you can't receive the rewards.</b></li>
+            </ul>
+
+            {% load crispy_forms_tags %}
+            <form id="mainForm"
+                  method="post">
+                {% csrf_token %}
+                <div class="col-xs-12 col-md-12">
+                    {% for field in form %}
+                        {{ field | as_crispy_field }}
+                    {% endfor %}
+                </div>
+            </form>
+
+            After you submit HIT, you can close this tab.
+        </div>
+    </div>
+</section>
+
+</body>
+
+<script type="text/javascript">
+    document.getElementById("id_task_condition").style.display = "none";
+    document.getElementById("id_submit_time").style.display = "none";
+</script>
+

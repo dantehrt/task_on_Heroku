@@ -1,0 +1,41 @@
+{% load static %}
+<html>
+<head>
+    <title>Task</title>
+    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.css"
+          rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.js"></script>
+    <link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+
+<body>
+<section class="container" id="all_content"
+         style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+    <div class="row">
+        <div class="col-xs-12 col-md-12">
+            <ul>
+                <li><strong>Make sure to leave MTurk's window open until you end tasks.</strong>
+                </li>
+                <li>When you are finished, you will return to MTurk"s page to paste the 'assignment_id' into the
+                    box.
+                </li>
+                <li><b>Must not</b> rewrite url during task.</li>
+                <li>You can receive rewards according to the number of completed tasks.</li>
+                <li>You can end task <b>whenever</b> you want.</li>
+                <li>When you choose <b>next</b> in task, your answer is submitted and you will move to next task.</li>
+                <li>When you choose <b>exit</b> in task, your answer is submitted and you will move to results page.
+                </li>
+            </ul>
+
+            <div style="margin-top: 10px">
+                <input type="button"
+                       onclick="location.href='{% url "mturk:task" worker_id=worker_id assignment_id=assignment_id task_order=1 task_condition=task_condition %}'"
+                       value="Start"
+                       class="btn btn-primary">
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>

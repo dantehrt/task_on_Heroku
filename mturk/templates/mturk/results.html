@@ -1,0 +1,71 @@
+{% load static %}
+<html>
+<head>
+    <title>Task</title>
+    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.css"
+          rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.js"></script>
+    <link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="{% static 'mturk/js/moment.js' %}"></script>
+    <script src="{% static 'mturk/js/moment-timezone.js' %}"></script>
+</head>
+
+<body>
+<section class="container" id="all_content"
+         style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+    <div class="row">
+        <div class="col-xs-12 col-md-12">
+            <h1>Your results</h1>
+            {% if is_completed %}
+                Please push "ok" button.
+            {% else %}
+                <ul>
+                    <li>If you want to <b>end</b> task, please push "ok" button.</li>
+                    <li>If you want to <b>continue</b> task, please push "back" button.</li>
+                </ul>
+
+            {% endif %}
+            {% load crispy_forms_tags %}
+            <form id="mainForm"
+                  action="{% url 'mturk:results' worker_id=worker_id  assignment_id=assignment_id task_condition=task_condition %}"
+                  method="post">
+                {% csrf_token %}
+                <div class="col-xs-12 col-md-12">
+                    {% for field in form %}
+                        {{ field | as_crispy_field }}
+                    {% endfor %}
+                </div>
+                <div class="col-xs-12 col-md-12" style="margin-top: 20px">
+                    <input type="submit" class="btn btn-primary" value="ok" name="ok_button"/>
+                </div>
+                {% if not is_completed %}
+                    <div class="col-xs-12 col-md-12" style="margin-top: 20px">
+                        <input type="submit" class="btn btn-primary" value="back" name="back_button"
+                               style="background-color: red; border-color: red"/>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</section>
+
+</body>
+<script type="text/javascript">
+    document.getElementById("id_assignment_id").style.display = "none";
+
+    var now = moment().tz('Asia/Tokyo');
+    document.getElementById("id_submit_time").value = now.format("YYYY-MM-DD HH:mm:ss");
+
+    document.getElementById("id_worker_id").style.display = "none";
+    document.getElementById("id_submit_time").style.display = "none";
+    document.getElementById("id_task_condition").style.display = "none";
+
+    window.onload = function () {
+        document.getElementById("mainForm").onsubmit = function () {
+            var submit_time = moment().tz('Asia/Tokyo');
+            document.getElementById("id_submit_time").value = submit_time.format("YYYY-MM-DD HH:mm:ss");
+            return true
+        };
+    };
+</script>
